@@ -2,13 +2,9 @@ module GH19
 
 using Downloads
 
-export explist, pkgdir, datadir, srcdir, download
+export explist, pkgdir, datadir, srcdir, download, download_all
 
 import Downloads: download
-
-#bc_file = datadir("Theta_anom_OPT-0015.nc")
-
-#Theta_anom_OPT-00015.nc downloaded from https://www.ncei.noaa.gov/pub/data/paleo/gcmoutput/gebbie2019/
 
 pkgdir() = dirname(dirname(pathof(GH19)))
 pkgdir(args...) = joinpath(pkgdir(), args...)
@@ -30,15 +26,17 @@ rooturl() = "https://www.ncei.noaa.gov/pub/data/paleo/gcmoutput/gebbie2019"
 
 rooturl(args...) = joinpath(rooturl(), args...)
 
-bc_file = datadir("Theta_anom_OPT-0015.nc")
-
 """
     function download(experiment::String;anomaly=false)
+
+# Arguments
+- `experiment::String`: name of experiment, use `explist()` to get possible names
+- `anomaly::Bool`: true to load θ anomaly, false to load full θ
+# Output
+- `outputfile`: name of loaded file, found in the `datadir()` directory
 """
 function download(experiment::String,anomaly=false)
     
-    #Theta_anom_OPT-00015.nc downloaded from https://www.ncei.noaa.gov/pub/data/paleo/gcmoutput/gebbie2019/
-    println("inside")
     if anomaly
         filename = "Theta_anom_"*experiment*".nc"
     else
@@ -51,6 +49,24 @@ function download(experiment::String,anomaly=false)
 
     Downloads.download(infile,outfile,verbose=true)
 
+end
+
+"""
+    function download_all()
+
+    Download output from 6 GH19 experiments totaling about 10 GB of data.
+"""
+function download_all()
+
+    outputfiles = Vector{String}()
+    exps = explist()
+    for exp in exps
+        for anomalyflag in (true,false)
+            println(exp*" "*string(anomalyflag))
+            push!(outputfiles,download(exp::String,anomalyflag))
+        end
+    end
+    return outputfiles
 end
 
 end

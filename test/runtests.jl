@@ -6,12 +6,22 @@ using Test
 
     using NCDatasets
 
-    experimentlist = explist()
+    @testset "download_all" begin
 
-    exp = experimentlist[1]
+    download_all()
 
-    anomaly = false
-    filename = GH19.download(exp,anomaly)
+    end
 
-    ds = NCDataset(filename)
+    @testset "download one" begin
+        
+        experimentlist = explist()
+
+        exp = experimentlist[1]
+
+        anomaly = false
+        filename = GH19.download(exp,anomaly)
+
+        ds = NCDataset(filename)
+    end
+
 end
