@@ -8,8 +8,9 @@ using Test
 
     @testset "download_all" begin
 
-    download_all()
-
+        outputfiles = download_all()
+        @test isfile.(outputfiles)
+        
     end
 
     @testset "download one" begin
@@ -21,6 +22,8 @@ using Test
         anomaly = false
         filename = GH19.download(exp,anomaly)
 
+        @test isfile(filename)
+        
         ds = NCDataset(filename)
     end
 
