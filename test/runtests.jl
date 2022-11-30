@@ -9,7 +9,9 @@ using Test
     @testset "download_all" begin
 
         outputfiles = download_all()
-        @test isfile.(outputfiles)
+        for oo in outputfiles
+            @test isfile(oo)
+        end
         
     end
 
