@@ -1,19 +1,38 @@
 module GH19
 
-using Downloads
+using Downloads, Interpolations, DrWatson, NCDatasets, NetCDF, TMI
 
-export explist, pkgdir, datadir, srcdir, download, download_all
 
-import Downloads: download
+export explist, pkgdir, datadir, srcdir, download, download_all, read4Dfield, 
+random_observations
 
-pkgdir() = dirname(dirname(pathof(GH19)))
-pkgdir(args...) = joinpath(pkgdir(), args...)
+"""
+    projectdir()
+Return the directory of the currently active project.
+```julia
+projectdir(args...) = joinpath(projectdir(), args...)
+```
+Join the path of the currently active project with `args`
+(typically other subfolders).
+"""
+function projectdir()
+    if is_standard_julia_project()
+        @warn "Using the standard Julia project."
+    end
+    dirname(Base.active_project())
+end
 
-datadir() = joinpath(pkgdir(),"data")
-datadir(args...) = joinpath(datadir(), args...)
+# pkgdir() = dirname()
+# pkgdir(args...) = joinpath(pkgdir(), args...)
 
-srcdir() = joinpath(pkgdir(),"src")
-srcdir(args...) = joinpath(srcdir(), args...)
+# datadir() = joinpath(pkgdir(),"data")
+# datadir(args...) = joinpath(datadir(), args...)
+
+# srcdir() = joinpath(pkgdir(),"src")
+# srcdir(args...) = joinpath(srcdir(), args...)
+
+
+include("/home/ameza/GH19.jl/src/GH19_config.jl")
 
 """
     explist -> experiment list
@@ -67,6 +86,68 @@ function download_all()
         end
     end
     return outputfiles
+end
+
+"""
+    function read4Dfield(file,tracername,γ)
+    Read a tracer field from NetCDF but return it 
+    as a Field. 
+# Arguments
+- `file`: TMI NetCDF file name
+- `tracername`: name of tracer
+- `γ::Grid`, TMI grid specification
+# Output
+- `c`::Field
+"""
+function read4Dfield(file,tracername,γ::Grid)
+    tracer = ncread(file,tracername)
+    tracer = permutedims(tracer, (1, 4, 3, 2)) #change to t-x-y-z
+    cs = Field[]
+    for i = 1:400
+        # if sum(isnan.(tracer[i, :, :, :][γ.wet])) > 0
+        #     println("readfield warning: NaN on grid")
+        # end
+        c = Field(tracer[i, :, :, :],γ)
+        push!(cs, c)
+    end
+    return cs
+end
+
+
+""" 
+    function random_observations(GH19Version,variable,locs)
+    Random observations 
+    This version: observations with random (uniform) spatial sampling
+# Arguments
+- `GH19Version::String`: version of GH19
+- `variable::String`: variable name to use as template
+- `N`: number of observations
+# Output
+- `ytrue`: uncontaminated observations, 4D field
+- `locs`: 3-tuples of locations for observations
+- `wis`: weighted indices for interpolation to locs sites
+"""
+function random_observations(GH19Version,variable,γ,N)
+    
+    GH19file = datadir(GH19Version)
+
+    @time θtrue = read4Dfield(GH19file, variable, γ)
+    nt = length(θtrue)
+    [replace!(θtrue[i].tracer,NaN=>0.0) for i = 1:nt]
+    
+    # get random locations that are wet (ocean)
+    locs = Vector{Tuple{Float64,Float64,Float64}}(undef,N)
+    [locs[i] = wetlocation(γ) for i in eachindex(locs)]
+    
+    # get weighted interpolation indices
+    N = length(locs)
+    wis= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,N)
+    [wis[i] = interpindex(locs[i],γ) for i in 1:N]
+    ytrue = zeros(nt, N)
+    [ ytrue[i, :] .= observe(θtrue[i],wis,γ) for i = 1:nt ]
+    
+    return ytrue, locs, wis
+    
 end
 
 end
