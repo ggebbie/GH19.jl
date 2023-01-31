@@ -101,7 +101,8 @@ end
 """
 function read4Dfield(file,tracername,γ::Grid)
     tracer = ncread(file,tracername)
-    tracer = permutedims(tracer, (1, 4, 3, 2)) #change to t-x-y-z
+    tracer = permutedims(tracer, (1, 4, 3, 2)) #change to (-t)-x-y-z
+    
     cs = Field[]
     for i = 1:400
         # if sum(isnan.(tracer[i, :, :, :][γ.wet])) > 0
