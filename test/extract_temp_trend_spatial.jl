@@ -1,6 +1,5 @@
-using Revise, DrWatson, Statistics,
-NCDatasets, Printf, 
-DataFrames, LaTeXStrings, Distances, 
+using Revise, DrWatson,
+NCDatasets, DataFrames, LaTeXStrings, Distances, 
 ECCOonPoseidon, ECCOtour, JLD2
 
 include("helperfuncs.jl")
@@ -31,7 +30,7 @@ vert_avg_temp = zeros(nt, 90, 180)
 
 #depth weighted average 
 for tt = 1:nt, k in 1:nz
-    vert_avg_temp[tt, :, :] .+=  (theta_OPT[tt, k, :, :] .* depth[k])./ sum(depth) 
+    vert_avg_temp[tt, :, :] .+=  theta_OPT[tt, k, :, :]./ nz
 end
 
 #compute the trends on the depth weighted average

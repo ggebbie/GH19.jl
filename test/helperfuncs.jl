@@ -1,4 +1,4 @@
-
+#computes the distances between grid cells
 function grid_distance(lon, lat)
     dx = similar(lat)
     for j in eachindex(lat)
@@ -8,6 +8,7 @@ function grid_distance(lon, lat)
     return dx
 end
 
+#computes the horizontal area of each grid cell
 function cell_area(lon, lat)
     dx = grid_distance(lon, lat)
     dy = haversine((lon[1],lat[1])
@@ -17,8 +18,8 @@ function cell_area(lon, lat)
     return area
 end
 
+#computes the volume of each grid cell
 function cell_volumes(depth, lons, lats)
-#construct the masked volume 
     nz = length(depth)
     areas = cellarea(lons, lats)
     volumes = zeros(Float32, length(depth), size(areas)[1], size(areas)[2])

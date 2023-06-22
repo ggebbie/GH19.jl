@@ -1,8 +1,8 @@
 
 include("helperfuncs.jl")
 
-using Revise, DrWatson, Statistics,
-NCDatasets, Printf, ECCOonPoseidon, Distances
+using Revise, DrWatson,
+NCDatasets, ECCOonPoseidon, Distances
 import PyPlot as plt
 
 ds_EQ  = NCDataset("/home/ameza/GH19.jl/data/Theta_EQ-0015.nc")
