@@ -18,9 +18,8 @@ using Test
     @testset "download one" begin
         
         experimentlist = explist()
-
+        expno = rand(1:length(experimentlist))
         exp = experimentlist[1]
-
         anomaly = false
         filename = GH19.download(exp,anomaly)
 
@@ -29,4 +28,10 @@ using Test
         ds = NCDataset(filename)
     end
 
+    @testset "compare to TMI grid" begin
+        using TMI
+        
+
+    end
+    
 end
