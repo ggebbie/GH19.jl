@@ -51,7 +51,7 @@ end
         @test θijk == θijk2
 
         locs = samplelocs()
-        θt,t=extract_timeseries(filename,"theta",locs,γ)
+        θt,tt=extract_timeseries(filename,"theta",locs,γ)
 
         # get variance of timeseries
         nl = length(locs)
