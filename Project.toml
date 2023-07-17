@@ -1,7 +1,7 @@
 name = "GH19"
 uuid = "91947a82-a5b4-404a-862e-a85adaeb659d"
 authors = ["G Jake Gebbie <ggebbie@whoi.edu>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
@@ -15,7 +15,7 @@ TMI = "582500f6-28c8-4d8f-aabe-b197735ec1d4"
 
 [compat]
 NCDatasets = "0.12"
-julia = "1.8"
+julia = "1.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
