@@ -52,7 +52,7 @@ function download(experiment::String,anomaly=false;force = false)
         !isdir(datadir()) && mkpath(datadir()) 
         Downloads.download(infile,outfile,verbose=true)
     else
-        println("File already downloaded; use `force=true` to re-downloade")
+        println("File already downloaded; use `force=true` to re-download")
     end
     return outfile
 end
@@ -134,7 +134,7 @@ end
 
     Also very slow to recompute interpolation factors each time.
 
-    Need to refactor.
+    Faster versions also available.
 """
 function extract_timeseries(file,tracername,locs,γ)
     t = NCDataset(file)["year"][:]
@@ -151,8 +151,61 @@ function extract_timeseries(file,tracername,locs,γ)
     return θ, t
 end
 
+"""
+function extract_timeseries(file::String,tracername::String,locs::Vector,γ::TMI.Grid)
 
+extract timeseries at locs. Requires TMI grid, γ.
 
+Refactored version.
 
+return θ,t
+"""
+function extract_timeseries(file::String,tracername::String,locs::Vector,γ::TMI.Grid)
+    t = NCDataset(file)["year"][:]
+    nt = length(t)
+    nlocs = length(locs)
+    θ = Vector{Vector{Float64}}(undef,nlocs) 
+
+    for ll in 1:nlocs
+        θ[ll],_ = extract_timeseries(file,tracername,locs[ll],γ)
+    end
+    return θ,t
 end
 
+"""
+function extract_timeseries(filename::String,tracername::String,loc::Tuple,γ::TMI.Grid)
+
+return θ,t
+"""
+function extract_timeseries(filename::String,tracername::String,loc::Tuple,γ::TMI.Grid)
+
+    # extract timeseries for all points with nonzero interpolation weights.
+    ww = interpindex(loc,γ)
+
+    # get number of timesteps
+    θtmp,t = extract_timeseries(filename,"theta",1,1,1)
+    nt = length(θtmp)
+    θ = zeros(nt)
+    wtotal = 0.0
+    for ii = 1:2
+        for jj = 1:2
+            for kk = 1:2
+                # get timeseries at each location, multiply by necessary weight.
+                wt = ww[1].weights[ii]*ww[2].weights[jj]*ww[3].weights[kk]
+                θtmp,_ = extract_timeseries(filename,"theta",ww[1].istart+ii-1,ww[2].istart+jj-1,ww[3].istart+kk-1)
+                if !isnan(θtmp[1])
+                    θ += wt* θtmp
+                    wtotal += wt
+                end
+            end
+        end
+    end
+
+    # if total weight not equal to 1.0, then normalize
+    if wtotal ≠ 1.0
+        θ ./= wtotal
+    end
+    return θ,t
+end
+
+end
