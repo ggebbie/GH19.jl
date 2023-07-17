@@ -2,10 +2,10 @@ module GH19
 
 using Downloads, TMI, NCDatasets
 
-export explist, pkgdir, datadir, srcdir, download, download_all, TMIversion,
+export explist, pkgdir, datadir, srcdir, download_exp, download_all, TMIversion,
     extract_timeseries
 
-import Downloads: download
+#import Downloads: download
 
 pkgdir() = dirname(dirname(pathof(GH19)))
 pkgdir(args...) = joinpath(pkgdir(), args...)
@@ -30,7 +30,7 @@ rooturl(args...) = joinpath(rooturl(), args...)
 TMIversion() = "modern_180x90x33_GH11_GH12" # all GH19 output uses this TMI version, no underscore = function
 
 """
-    function download(experiment::String;anomaly=false)
+    function download_exp(experiment::String;anomaly=false)
 
 # Arguments
 - `experiment::String`: name of experiment, use `explist()` to get possible names
@@ -38,7 +38,7 @@ TMIversion() = "modern_180x90x33_GH11_GH12" # all GH19 output uses this TMI vers
 # Output
 - `outputfile`: name of loaded file, found in the `datadir()` directory
 """
-function download(experiment::String,anomaly=false;force = false)
+function download_exp(experiment::String,anomaly=false;force = false)
     
     if anomaly
         filename = "Theta_anom_"*experiment*".nc"
@@ -69,7 +69,7 @@ function download_all()
     for exp in exps
         for anomalyflag in (true,false)
             println(exp*" "*string(anomalyflag))
-            push!(outputfiles,GH19.download(exp::String,anomalyflag))
+            push!(outputfiles,download_exp(exp::String,anomalyflag))
         end
     end
     return outputfiles

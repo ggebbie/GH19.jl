@@ -28,7 +28,7 @@ end
         expno = rand(1:length(experimentlist))
         exp = experimentlist[1]
         anomaly = false
-        filename = GH19.download(exp,anomaly)
+        filename = download_exp(exp,anomaly)
 
         @test isfile(filename)
         
