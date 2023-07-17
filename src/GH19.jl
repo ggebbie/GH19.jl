@@ -69,7 +69,7 @@ function download_all()
     for exp in exps
         for anomalyflag in (true,false)
             println(exp*" "*string(anomalyflag))
-            push!(outputfiles,download(exp::String,anomalyflag))
+            push!(outputfiles,GH19.download(exp::String,anomalyflag))
         end
     end
     return outputfiles
